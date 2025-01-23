@@ -12,6 +12,7 @@
         /*#resultsForm {visibility: hidden;}*/
     </style>
     <script src="form.js" type="application/javascript"></script>
+    <script src="db.js" type="application/javascript"></script>
 </head>
 <body>
 
@@ -56,14 +57,24 @@
     <div id="saveResultsForm">
       <h2>Chcete si výsledek uložit?</h2>
       <label>jméno: </label>
-      <input type="text" id="namePers">
-      <button id="saveResults" onclick="saveResults()">Přidat předmět</button>
+      <input type="text" id="name">
+      <button id="saveResults" onclick="saveResultsFormUI()">Přidat předmět</button>
     </div>
 
 
 
     <h2>Uložené odpovědi:</h2>
-    <ul id="savedResults"></ul>
+    <table>
+      <thead>
+    <tr>
+          <th>ID</th>
+          <th>Jméno</th>
+          <th>Skóre</th>
+      </tr>
+    <thead>
+      <tbody id="savedResults">		
+      </tbody>
+  </table>
 
     
 
