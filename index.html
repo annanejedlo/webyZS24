@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MVC Formulář s Ukládáním</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .question { margin-bottom: 10px; }
+        button { margin-top: 10px; }
+        #saveResultsForm {visibility: hidden;}
+        /*#resultsForm {visibility: hidden;}*/
+    </style>
+    <script src="form.js" type="application/javascript"></script>
+</head>
+<body>
+
+    <h1>Dotazník</h1>
+
+    <form id="questionForm">
+        <div class="question">
+            <p>1. Máte rádi kávu?</p>
+            <input type="checkbox" id="q1" value="1"> Ano
+        </div>
+
+        <div class="question">
+            <p>2. Používáte sociální sítě?</p>
+            <input type="checkbox" id="q2" value="2"> Ano
+        </div>
+
+        <div class="question">
+            <p>3. Máte domácího mazlíčka?</p>
+            <input type="checkbox" id="q3" value="3"> Ano
+        </div>
+
+        <div class="question">
+            <p>4. Pracujete z domova?</p>
+            <input type="checkbox" id="q4" value="4"> Ano
+        </div>
+
+        <div class="question">
+            <p>5. Čtete knihy?</p>
+            <input type="checkbox" id="q5" value="5"> Ano
+        </div>
+
+        <button type="button" id="submitAnswers" onclick="evalAnswers()"> Odeslat odpovědi </button>
+    </form>
+
+    <div id="resultsForm">
+      <h2>Váš výsledek:</h2>
+      <h3 id="AnswersResult">0</h3>
+    </div>
+
+
+
+    <div id="saveResultsForm">
+      <h2>Chcete si výsledek uložit?</h2>
+      <label>jméno: </label>
+      <input type="text" id="namePers">
+      <button id="saveResults" onclick="saveResults()">Přidat předmět</button>
+    </div>
+
+
+
+    <h2>Uložené odpovědi:</h2>
+    <ul id="savedResults"></ul>
+
+    
+
+</body>
+</html>
