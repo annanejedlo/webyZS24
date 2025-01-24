@@ -3,45 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MVC Formulář s Ukládáním</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .question { margin-bottom: 10px; }
-        button { margin-top: 10px; }
-        #saveResultsForm {visibility: hidden;}
-        /*#resultsForm {visibility: hidden;}*/
-    </style>
+    <title>Inferno</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script src="form.js" type="application/javascript"></script>
     <script src="db.js" type="application/javascript"></script>
 </head>
 <body>
 
-    <h1>Dotazník</h1>
+    <h1>Do jakého kruhu pekla patřím?</h1>
 
     <form id="questionForm">
         <div class="question">
-            <p>1. Máte rádi kávu?</p>
-            <input type="checkbox" id="q1" value="1"> Ano
+            <p>Velmi často se zlobím.</p>
+            <input type="checkbox" id="q1" value="5"> Souhlasím
         </div>
 
         <div class="question">
-            <p>2. Používáte sociální sítě?</p>
-            <input type="checkbox" id="q2" value="2"> Ano
+            <p>Odmítám učení Ježíše Krista.</p>
+            <input type="checkbox" id="q2" value="6"> Souhlasím
         </div>
 
         <div class="question">
-            <p>3. Máte domácího mazlíčka?</p>
-            <input type="checkbox" id="q3" value="3"> Ano
+            <p>Nevím, kdo je Ježíš Kristus</p>
+            <input type="checkbox" id="q3" value="1"> Souhlasím
         </div>
 
         <div class="question">
-            <p>4. Pracujete z domova?</p>
-            <input type="checkbox" id="q4" value="4"> Ano
+            <p>Jsem často násilnický/á</p>
+            <input type="checkbox" id="q4" value="7"> Souhlasím
         </div>
 
         <div class="question">
-            <p>5. Čtete knihy?</p>
-            <input type="checkbox" id="q5" value="5"> Ano
+            <p>Upřednostnil/a jsem rozkoš nad spoustu věcí.</p>
+            <input type="checkbox" id="q5" value="5"> Souhlasím
+        </div>
+
+        <div class="question">
+            <p>Podvedl/a jsem.</p>
+            <input type="checkbox" id="q6" value="8"> Souhlasím
+        </div>
+
+        <div class="question">
+            <p>Jsem nehorázný hamoun.</p>
+            <input type="checkbox" id="q7" value="4"> Souhlasím
+        </div>
+
+        <div class="question">
+          <p>Velmi vážně jsem zradil/a své blízké.</p>
+          <input type="checkbox" id="q8" value="9"> Souhlasím
+        </div>
+
+        <div class="question">
+          <p>Jsem fanouškem obžerství.</p>
+          <input type="checkbox" id="q9" value="4"> Souhlasím
         </div>
 
         <button type="button" id="submitAnswers" onclick="evalAnswers()"> Odeslat odpovědi </button>
@@ -56,25 +70,29 @@
 
     <div id="saveResultsForm">
       <h2>Chcete si výsledek uložit?</h2>
-      <label>jméno: </label>
+      <label>Jméno: </label>
       <input type="text" id="name">
-      <button id="saveResults" onclick="saveResultsFormUI()">Přidat předmět</button>
+      <button id="saveResults" onclick="saveResultsFormUI()">Uložit</button>
     </div>
 
 
 
     <h2>Uložené odpovědi:</h2>
+    <div id="tabulka">
     <table>
       <thead>
-    <tr>
+        <tr>
           <th>ID</th>
-          <th>Jméno</th>
-          <th>Skóre</th>
-      </tr>
-    <thead>
+          <th>JMÉNO</th>
+          <th>SKÓRE</th>
+          <th>ZOBRAZ VÝSLEDKY</th>
+          <th>SMAZAT</th>
+        </tr>
+      </thead>
       <tbody id="savedResults">		
       </tbody>
   </table>
+  </div>
 
     
 

@@ -1,0 +1,39 @@
+body {
+  background-color:mistyrose;
+  font-family: Arial, sans-serif; 
+  text-align: center;
+
+}
+
+.question { 
+  margin-bottom: 10px; 
+  padding-bottom: 20px;
+
+
+}
+
+button { 
+  margin-top: 10px; 
+  padding: 1em;
+}
+#saveResultsForm {visibility: hidden;}
+
+th {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+td {
+  text-align: center;
+}
+
+table, thead {
+  border: 1px solid black;
+  text-align: center;
+  margin-bottom: 1em
+
+}
+
+#tabulka {
+  width: 100%
+}
