@@ -246,7 +246,6 @@ class MojeDB {
         q[8].checked = i.q9
       }
     }
-
   }
 
   uncheckAllBoxes(event) {

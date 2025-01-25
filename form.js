@@ -2,7 +2,7 @@ class Form {
 
   evaluateAnswers() {
     console.log("zavolana fce class Form/evaluateAnswers")
-    var currCircle = 0;
+    let currCircle = 0;
 
     const q1 = document.getElementById('q1')
     const q2 = document.getElementById('q2')

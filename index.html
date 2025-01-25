@@ -11,51 +11,52 @@
 <body>
 
     <h1>Do jakého kruhu pekla patřím?</h1>
+    <h4>Zaškrtni checkboxy u zločinů, které jsi provedl, pekelníku.</h4>
 
     <form id="questionForm">
         <div class="question">
             <p>Velmi často se zlobím.</p>
-            <input type="checkbox" id="q1" value="5"> Souhlasím
+            <input type="checkbox" id="q1" value="5">
         </div>
 
         <div class="question">
             <p>Odmítám učení Ježíše Krista.</p>
-            <input type="checkbox" id="q2" value="6"> Souhlasím
+            <input type="checkbox" id="q2" value="6">
         </div>
 
         <div class="question">
-            <p>Nevím, kdo je Ježíš Kristus</p>
-            <input type="checkbox" id="q3" value="1"> Souhlasím
+            <p>Nevím, kdo je Ježíš Kristus.</p>
+            <input type="checkbox" id="q3" value="1">
         </div>
 
         <div class="question">
-            <p>Jsem často násilnický/á</p>
-            <input type="checkbox" id="q4" value="7"> Souhlasím
+            <p>Jsem často násilnický/á.</p>
+            <input type="checkbox" id="q4" value="7">
         </div>
 
         <div class="question">
             <p>Upřednostnil/a jsem rozkoš nad spoustu věcí.</p>
-            <input type="checkbox" id="q5" value="5"> Souhlasím
+            <input type="checkbox" id="q5" value="2">
         </div>
 
         <div class="question">
             <p>Podvedl/a jsem.</p>
-            <input type="checkbox" id="q6" value="8"> Souhlasím
+            <input type="checkbox" id="q6" value="8">
         </div>
 
         <div class="question">
             <p>Jsem nehorázný hamoun.</p>
-            <input type="checkbox" id="q7" value="4"> Souhlasím
+            <input type="checkbox" id="q7" value="3">
         </div>
 
         <div class="question">
           <p>Velmi vážně jsem zradil/a své blízké.</p>
-          <input type="checkbox" id="q8" value="9"> Souhlasím
+          <input type="checkbox" id="q8" value="9">
         </div>
 
         <div class="question">
           <p>Jsem fanouškem obžerství.</p>
-          <input type="checkbox" id="q9" value="4"> Souhlasím
+          <input type="checkbox" id="q9" value="4">
         </div>
 
         <button type="button" id="submitAnswers" onclick="evalAnswers()"> Odeslat odpovědi </button>
@@ -93,6 +94,9 @@
       </tbody>
   </table>
   </div>
+
+  <button class="toggle-mode" onclick="document.body.classList.toggle('light-mode')">Přepnout režim</button>
+
 
     
 
