@@ -1,15 +1,16 @@
 
 class MojeDB {
   #db;
-  #ver = 3;
+  #ver = 4;
   #dbName = 'webyZS25';
   #tbRes = "savedResults";
   #tbAns = "savedAnswers";
+  #tbTheme = "setTheme";
   #dbRequest;
 
   constructor() {
       
-      /// pristup k DB ///
+      /// pristup k DB
       this.#dbRequest = indexedDB.open(this.#dbName, this.#ver);
 
       // vytvoreni database        
@@ -18,6 +19,15 @@ class MojeDB {
       this.#dbRequest.onerror = function(event) {
           console.log("Něco špatně: ", event.target);
       };
+      //this.initDB();
+      document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("toggleTheme");
+        if (btn) {
+            btn.addEventListener("click", () => this.toggleTheme());
+        } else {
+            console.error("Tlačítko toggleTheme neexistuje!");
+        }
+    });
   }
 
   onUpgradeNeeded(ev) { //spusti se pouze jednou, pak už je DB vytvořena, nutno smazat storage
@@ -27,12 +37,14 @@ class MojeDB {
       switch(ev.oldVersion) {
             
         case 0:
-            ///neexistovala
             const tbRes = this.#db.createObjectStore(this.#tbRes, {keyPath: "id", autoIncrement: true});
             tbRes.createIndex('jmenoInd', 'jmeno');
         case 1:
             const tbAns = this.#db.createObjectStore(this.#tbAns, {keyPath: "id", autoIncrement: true});
             tbAns.createIndex('IDResInd', 'IDRes');
+        case 2:
+            const tbTheme = this.#db.createObjectStore(this.#tbTheme, {keyPath: "id", autoIncrement: true});
+            //tbTheme.createIndex()
     }
   }
 
@@ -43,6 +55,7 @@ class MojeDB {
           console.log("db error: ", ev.target.errorCode);
       };    
       this.printRes();
+      this.loadTheme()
       
   }
 
@@ -116,6 +129,23 @@ class MojeDB {
       tbAns.delete(id);
   }
 
+  //vkládám informaci o barevném módu do tabulky tbTheme
+  setTheme(truefalse) {
+    const trans = this.#db.transaction(this.#tbTheme, 'readwrite');
+    const tbTheme = trans.objectStore(this.#tbTheme);
+    console.log(truefalse)
+
+    trans.oncomplete = () => {
+        console.log('Barevný mód uložen - světlá:', truefalse);
+    };
+    trans.onerror = (e) => {
+        console.error('Chyba při ukládání motivu:', e.target.error);
+    };
+
+    // Ukládáme do IndexedDB (vždy přepisujeme existující hodnotu)
+    tbTheme.put({ id: "lightTheme", theme: truefalse });
+  }
+
   //tahám data z tbRes - jak pro vypsání v indexu tak v konzoli
   printRes() {
     const data = [];
@@ -166,8 +196,7 @@ class MojeDB {
         btnShow.type = "button";
         btnShow.value = "Ukaž";
         btnShow.setAttribute("btnShow-id", a.id);
-        btnShow.addEventListener("mousedown", (event) => this.showSavedAns(event));
-        btnShow.addEventListener("mouseup", (event) => this.uncheckAllBoxes(event));
+        btnShow.addEventListener("click", (event) => this.showSavedAns(event));
         td.appendChild(btnShow);
         tr.appendChild(td);
 
@@ -188,9 +217,12 @@ class MojeDB {
   showSavedAns(event) {
     let button = event.target;
     let id = Number(button.getAttribute("btnShow-id"));
+    let nadpis = document.getElementById("nadpis");
+    let jmeno;
     const data = [];
-    
-    const trans = this.#db.transaction(this.#tbAns, 'readonly');
+
+    if (button.value == "Ukaž") {
+        const trans = this.#db.transaction(this.#tbAns, 'readonly');
     trans.oncomplete = (e) => {
         console.log('fce printAns hotova');
         this.checkBoxes(data, id)
@@ -206,14 +238,57 @@ class MojeDB {
         if(curs) {
             console.log(curs.value, curs.key);
             data.push(curs.value);
-            //jdu na dalši zaznam
+            jmeno = this.getNameFromRes(curs.value.id); //hledám jméno v tb tbRes
+            console.log("jmeno pekelnika: " + jmeno)
             curs.continue();
         } else {
             console.log('výpis tbAns hotov');
         }
+        document.getElementById('resultsForm').style.visibility = "hidden"
       }
 
+    button.value = "Schovej"
+    } else if (button.value == "Schovej") {
+        this.uncheckAllBoxes()
+        nadpis.innerHTML = "Zaškrtni checkboxy u zločinů, které jsi provedl, pekelníku."
+        button.value = "Ukaž"
+    } else {
+        alert("chyba, prosím o refresh")
+    }
+
+    document.addEventListener("click", (event) => {
+        if (event.target !== button) {
+            this.uncheckAllBoxes()
+            nadpis.innerHTML = "Zaškrtni checkboxy u zločinů, které jsi provedl, pekelníku."
+            button.value = "Ukaž"
+        }
+    });
+    
+
   }
+
+  getNameFromRes(id) {
+    const trans = this.#db.transaction(this.#tbRes, 'readonly');
+    const tbRes = trans.objectStore(this.#tbRes);
+    const request = tbRes.get(id);
+
+    request.onsuccess = (event) => {
+        const result = event.target.result;
+        if (result) {
+            console.log(`Pro ID ${id} nalezeno jméno: ${result.name}`);
+            nadpis.innerHTML = "!!! ZOBRAZUJI ULOŽENÉ VÝSLEDKY PEKELNÍKA " + result.name + " !!!"
+        } else {
+            console.log(`Pro ID ${id} nebyl nalezen záznam v tbRes`);
+            nadpis.innerHTML = "!!! ZOBRAZUJI ULOŽENÉ VÝSLEDKY PEKELNÍKA !!!"
+        }
+    };
+
+    request.onerror = (event) => {
+        console.error("Chyba při hledání v tbRes:", event.target.error);
+    };
+    }
+
+
 
   assignBoxes() {
     const q1 = document.getElementById('q1')
@@ -254,6 +329,38 @@ class MojeDB {
       i.checked = false
     }
   }
+
+  loadTheme() {
+    const trans = this.#db.transaction(this.#tbTheme, 'readonly');
+    const tbTheme = trans.objectStore(this.#tbTheme);
+    const request = tbTheme.get("lightTheme");
+    console.log("zavolana fce loadTheme")
+    console.log(request)
+
+    request.onsuccess = (event) => {
+        const data = event.target.result;
+        console.log("succes fce loadTheme"+data.theme)
+        if (data) {
+            console.log("Načtený mód - světlý:", data.theme);
+            if (data.theme == true) {
+                document.body.classList.add("light-mode");
+            } else {
+                document.body.classList.remove("light-mode");
+            }
+        }
+    };
+
+    request.onerror = (event) => {
+        console.error("Chyba při čtení motivu:", event.target.error);
+    };
+    }
+
+  toggleTheme() {
+        document.body.classList.toggle("light-mode");
+        const isLightMode = document.body.classList.contains("light-mode");
+        console.log("isLightMode")
+        this.setTheme(isLightMode);
+    }
 }
 
 const DB = new MojeDB();
