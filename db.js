@@ -162,7 +162,6 @@ class MojeDB {
     tbRes.openCursor().onsuccess = (ev) => {
         let curs = ev.target.result;
         if(curs) {
-            console.log(curs.value, curs.key);
             data.push(curs.value);
             //jdu na dalši zaznam
             curs.continue();
@@ -176,7 +175,6 @@ class MojeDB {
   printHtmlRes(data) {
     const tbody = document.getElementById('savedResults');
     for(let a of data) {
-        console.log(a);
         let tr = document.createElement('tr');
         
         let td = document.createElement('td');
@@ -217,66 +215,117 @@ class MojeDB {
   showSavedAns(event) {
     let button = event.target;
     let id = Number(button.getAttribute("btnShow-id"));
+    console.log("Zmáčknuto, ID zmáčknutého tlačítka je " + id);
     let nadpis = document.getElementById("nadpis");
-    let jmeno;
     const data = [];
 
-    if (button.value == "Ukaž") {
-        const trans = this.#db.transaction(this.#tbAns, 'readonly');
-    trans.oncomplete = (e) => {
-        console.log('fce printAns hotova');
-        this.checkBoxes(data, id)
-        
-    };
-    trans.onerror = (e) => {
-        console.log('fce printSnd error: ' + e.target.errorCode)
-    };
-
-    const tbAns = trans.objectStore(this.#tbAns);
-    tbAns.openCursor().onsuccess = (ev) => {
-        let curs = ev.target.result;
-        if(curs) {
-            console.log(curs.value, curs.key);
-            data.push(curs.value);
-            jmeno = this.getNameFromRes(curs.value.id); //hledám jméno v tb tbRes
-            console.log("jmeno pekelnika: " + jmeno)
-            curs.continue();
-        } else {
-            console.log('výpis tbAns hotov');
-        }
-        document.getElementById('resultsForm').style.visibility = "hidden"
-      }
-
-    button.value = "Schovej"
-    } else if (button.value == "Schovej") {
-        this.uncheckAllBoxes()
-        nadpis.innerHTML = "Zaškrtni checkboxy u zločinů, které jsi provedl, pekelníku."
-        button.value = "Ukaž"
-    } else {
-        alert("chyba, prosím o refresh")
+    // 🛑 Pokud existuje staré tlačítko, vrátíme ho na "Ukaž"
+    if (this.activeButton && this.activeButton !== button) {
+        this.activeButton.value = "Ukaž";
     }
 
-    document.addEventListener("click", (event) => {
-        if (event.target !== button) {
-            this.uncheckAllBoxes()
-            nadpis.innerHTML = "Zaškrtni checkboxy u zločinů, které jsi provedl, pekelníku."
-            button.value = "Ukaž"
-        }
+    if (button.value === "Ukaž") {
+        button.value = "Schovej";
+        this.activeButton = button;  // 🎯 Uložíme nové aktivní tlačítko
+        console.log("Upraveno tlačítko s ID " + id + " z Ukaž na Schovej");
+
+        const trans = this.#db.transaction(this.#tbAns, 'readonly');
+        trans.oncomplete = () => {
+            console.log('Fce printAns hotova');
+            this.checkBoxes(data, id);
+            console.log("Zaškrtané odpovídající boxy pro člověka s ID " + id);
+        };
+        trans.onerror = (e) => {
+            console.log('Fce printAns error: ' + e.target.errorCode);
+        };
+
+        const tbAns = trans.objectStore(this.#tbAns);
+        tbAns.openCursor().onsuccess = (ev) => {
+            let curs = ev.target.result;
+            if (curs) {
+                data.push(curs.value);
+                this.getNameFromRes(id).then(jmeno => {  
+                    console.log("Jméno člověka se zvoleným ID: " + jmeno);
+                    nadpis.innerHTML = jmeno 
+                        ? `!!! ZOBRAZUJI ULOŽENÉ VÝSLEDKY PEKELNÍKA ${jmeno} !!!` 
+                        : "!!! ZOBRAZUJI ULOŽENÉ VÝSLEDKY PEKELNÍKA !!!";
+                });
+                curs.continue();
+            } 
+            document.getElementById('resultsForm').style.visibility = "hidden";
+        };
+
+        // 🛑 Nejdřív odstraníme předchozí listener
+        document.removeEventListener("click", this.handleOutsideClick);
+
+        // 🎯 Nastavíme nový listener
+        this.handleOutsideClick = (event) => {
+            if (event.target !== button) { 
+                this.uncheckAllBoxes();
+                nadpis.innerHTML = "Zaškrtni checkboxy u zločinů, které jsi provedl, pekelníku.";
+                button.value = "Ukaž";
+                document.getElementById('resultsForm').style.visibility = "visible";
+
+                console.log("Změna HTML na základě kliknutí mimo, ID: " + id);
+
+                document.removeEventListener("click", this.handleOutsideClick);
+            }
+        };
+
+        document.addEventListener("click", this.handleOutsideClick);
+        
+    } else if (button.value === "Schovej") {
+        console.log("Zavoláno showSavedAns, když value tlačítka je Schovej");
+        this.uncheckAllBoxes();
+        nadpis.innerHTML = "Zaškrtni checkboxy u zločinů, které jsi provedl, pekelníku.";
+        button.value = "Ukaž";
+        document.getElementById('resultsForm').style.visibility = "visible";
+
+        document.removeEventListener("click", this.handleOutsideClick);
+    } else {
+        console.log("Chyba, prosím o refresh");
+    }
+}
+
+
+
+
+// Funkce pro získání jména z tbRes
+async getNameFromRes(id) {
+    return new Promise((resolve, reject) => {
+        const trans = this.#db.transaction(this.#tbRes, 'readonly');
+        const tbRes = trans.objectStore(this.#tbRes);
+        const request = tbRes.get(id);
+
+        request.onsuccess = (event) => {
+            if (request.result) {
+                resolve(request.result.name);
+                nadpis.innerHTML = "!!! ZOBRAZUJI ULOŽENÉ VÝSLEDKY PEKELNÍKA " + request.result.name + " !!!"
+            } else {
+                resolve("Neznámý pekelník");
+            }
+        };
+
+        request.onerror = () => {
+            reject("Chyba při získávání jména");
+        };
     });
-    
+    }
 
-  }
 
-  getNameFromRes(id) {
+
+
+  /*getNameFromRes(id) {
     const trans = this.#db.transaction(this.#tbRes, 'readonly');
     const tbRes = trans.objectStore(this.#tbRes);
     const request = tbRes.get(id);
+    console.log("v getnamefromres je id: " + id)
 
     request.onsuccess = (event) => {
         const result = event.target.result;
-        if (result) {
-            console.log(`Pro ID ${id} nalezeno jméno: ${result.name}`);
-            nadpis.innerHTML = "!!! ZOBRAZUJI ULOŽENÉ VÝSLEDKY PEKELNÍKA " + result.name + " !!!"
+        console.log(result)
+        if (result.id == id) {
+            
         } else {
             console.log(`Pro ID ${id} nebyl nalezen záznam v tbRes`);
             nadpis.innerHTML = "!!! ZOBRAZUJI ULOŽENÉ VÝSLEDKY PEKELNÍKA !!!"
@@ -286,7 +335,7 @@ class MojeDB {
     request.onerror = (event) => {
         console.error("Chyba při hledání v tbRes:", event.target.error);
     };
-    }
+    }*/
 
 
 
@@ -308,7 +357,7 @@ class MojeDB {
   checkBoxes(data, idecko) {
     const q = this.assignBoxes()
     for (let i of data) {
-      console.log(i)
+
       if (i.id == idecko) {
         q[0].checked = i.q1
         q[1].checked = i.q2
@@ -335,7 +384,6 @@ class MojeDB {
     const tbTheme = trans.objectStore(this.#tbTheme);
     const request = tbTheme.get("lightTheme");
     console.log("zavolana fce loadTheme")
-    console.log(request)
 
     request.onsuccess = (event) => {
         const data = event.target.result;
